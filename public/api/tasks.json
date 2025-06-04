@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "status": "IN_PROGRESS",
+    "loadDate": "2024-02-28",
+    "dataset": "Dataset A",
+    "startDate": "2024-01-01",
+    "endDate": "2024-01-31"
+  },
+  {
+    "id": 2,
+    "status": "COMPLETED",
+    "loadDate": "2024-02-27",
+    "dataset": "Dataset B",
+    "startDate": "2024-01-01",
+    "endDate": "2024-01-31"
+  },
+  {
+    "id": 3,
+    "status": "ERROR",
+    "loadDate": "2024-02-26",
+    "dataset": "Dataset C",
+    "startDate": "2024-01-01",
+    "endDate": "2024-01-31"
+  }
+]

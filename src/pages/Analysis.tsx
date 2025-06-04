@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Paper,
@@ -12,98 +12,45 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TableSortLabel,
-  Chip,
-  Box,
 } from '@mui/material';
 
-// Mock data - replace with actual API calls
-const mockDatasets = ['Dataset A', 'Dataset B', 'Dataset C'];
-const mockAnalyses = [
-  { id: 1, date: '2024-02-28', status: 'Completed' },
-  { id: 2, date: '2024-02-27', status: 'Completed' },
-];
-
-type Result = {
-  rowNumber: number;
-  importance: 'CRITICAL' | 'HIGH' | 'NORMAL' | 'LOW';
-  description: string;
-};
-
-const mockResults: Result[] = [
-  {
-    rowNumber: 1,
-    importance: 'CRITICAL',
-    description: 'Missing values detected in key columns',
-  },
-  {
-    rowNumber: 2,
-    importance: 'HIGH',
-    description: 'Outliers found in numerical columns',
-  },
-  {
-    rowNumber: 3,
-    importance: 'NORMAL',
-    description: 'Data distribution appears normal',
-  },
-  {
-    rowNumber: 4,
-    importance: 'LOW',
-    description: 'Minor data quality issues detected',
-  },
-];
-
-type Order = 'asc' | 'desc';
-
 const Analysis = () => {
-  const [selectedDataset, setSelectedDataset] = useState('');
+  const [datasets, setDatasets] = useState<{ id: number; name: string }[]>([]);
+  const [selectedDataset, setSelectedDataset] = useState<number | null>(null);
+  const [analyses, setAnalyses] = useState<any[]>([]);
   const [selectedAnalysis, setSelectedAnalysis] = useState<number | null>(null);
-  const [results, setResults] = useState<Result[]>([]);
-  const [order, setOrder] = useState<Order>('asc');
-  const [orderBy, setOrderBy] = useState<keyof Result>('rowNumber');
+  const [results, setResults] = useState<any>(null);
 
-  const handleDatasetChange = (event: any) => {
-    setSelectedDataset(event.target.value);
+  useEffect(() => {
+    fetch('/api/datasets.json')
+      .then((res) => res.json())
+      .then((data) => setDatasets(data))
+      .catch(() => setDatasets([]));
+  }, []);
+
+  const handleDatasetChange = async (event: any) => {
+    const datasetId = Number(event.target.value);
+    setSelectedDataset(datasetId);
     setSelectedAnalysis(null);
-    setResults([]);
+    setResults(null);
+    try {
+      const res = await fetch(`/api/datasets/${datasetId}/analyses.json`);
+      const data = await res.json();
+      setAnalyses(data);
+    } catch {
+      setAnalyses([]);
+    }
   };
 
-  const handleAnalysisSelect = (analysisId: number) => {
+  const handleAnalysisSelect = async (analysisId: number) => {
     setSelectedAnalysis(analysisId);
-    setResults(mockResults);
-  };
-
-  const handleSort = (property: keyof Result) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-
-    const sortedResults = [...results].sort((a, b) => {
-      const aValue = a[property];
-      const bValue = b[property];
-      
-      if (property === 'importance') {
-        const importanceOrder = { CRITICAL: 0, HIGH: 1, NORMAL: 2, LOW: 3 };
-        return (isAsc ? 1 : -1) * 
-          (importanceOrder[a.importance] - importanceOrder[b.importance]);
-      }
-      
-      return (isAsc ? 1 : -1) * 
-        (aValue < bValue ? -1 : aValue > bValue ? 1 : 0);
-    });
-
-    setResults(sortedResults);
-  };
-
-  const getImportanceChip = (importance: string) => {
-    const importanceProps = {
-      CRITICAL: { color: 'error' as const, label: 'Critical' },
-      HIGH: { color: 'warning' as const, label: 'High' },
-      NORMAL: { color: 'info' as const, label: 'Normal' },
-      LOW: { color: 'default' as const, label: 'Low' },
-    }[importance] || { color: 'default' as const, label: importance };
-
-    return <Chip {...importanceProps} size="small" />;
+    try {
+      const res = await fetch(`/api/analyses/${analysisId}/results.json`);
+      const data = await res.json();
+      setResults(data);
+    } catch {
+      setResults(null);
+    }
   };
 
   return (
@@ -117,13 +64,13 @@ const Analysis = () => {
           <FormControl fullWidth>
             <InputLabel>Dataset</InputLabel>
             <Select
-              value={selectedDataset}
+              value={selectedDataset ?? ''}
               label="Dataset"
               onChange={handleDatasetChange}
             >
-              {mockDatasets.map((dataset) => (
-                <MenuItem key={dataset} value={dataset}>
-                  {dataset}
+              {datasets.map((dataset) => (
+                <MenuItem key={dataset.id} value={dataset.id}>
+                  {dataset.name}
                 </MenuItem>
               ))}
             </Select>
@@ -138,12 +85,12 @@ const Analysis = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Analysis ID</TableCell>
-                    <TableCell>Date</TableCell>
+                    <TableCell>Name</TableCell>
                     <TableCell>Status</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {mockAnalyses.map((analysis) => (
+                  {analyses.map((analysis) => (
                     <TableRow
                       key={analysis.id}
                       hover
@@ -152,7 +99,7 @@ const Analysis = () => {
                       selected={selectedAnalysis === analysis.id}
                     >
                       <TableCell>{analysis.id}</TableCell>
-                      <TableCell>{analysis.date}</TableCell>
+                      <TableCell>{analysis.name}</TableCell>
                       <TableCell>{analysis.status}</TableCell>
                     </TableRow>
                   ))}
@@ -163,44 +110,27 @@ const Analysis = () => {
         </div>
       </Paper>
 
-      {results.length > 0 && (
+      {results && (
         <Paper className="p-6">
           <Typography variant="h6" gutterBottom>
             EDA Results
+          </Typography>
+          <Typography variant="subtitle1" gutterBottom>
+            {results.summary}
           </Typography>
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>
-                    <TableSortLabel
-                      active={orderBy === 'rowNumber'}
-                      direction={orderBy === 'rowNumber' ? order : 'asc'}
-                      onClick={() => handleSort('rowNumber')}
-                    >
-                      Row Number
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell>
-                    <TableSortLabel
-                      active={orderBy === 'importance'}
-                      direction={orderBy === 'importance' ? order : 'asc'}
-                      onClick={() => handleSort('importance')}
-                    >
-                      Importance
-                    </TableSortLabel>
-                  </TableCell>
-                  <TableCell>Description</TableCell>
+                  <TableCell>Records Processed</TableCell>
+                  <TableCell>Errors</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {results.map((result) => (
-                  <TableRow key={result.rowNumber}>
-                    <TableCell>{result.rowNumber}</TableCell>
-                    <TableCell>{getImportanceChip(result.importance)}</TableCell>
-                    <TableCell>{result.description}</TableCell>
-                  </TableRow>
-                ))}
+                <TableRow>
+                  <TableCell>{results.details.recordsProcessed}</TableCell>
+                  <TableCell>{results.details.errors}</TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </TableContainer>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Paper,
@@ -14,18 +14,19 @@ import {
 } from '@mui/material';
 import { Play } from 'lucide-react';
 
-// Mock data - replace with actual API calls
-const mockDatasets = [
-  'Dataset A',
-  'Dataset B',
-  'Dataset C',
-];
-
 const Parameters = () => {
+  const [datasets, setDatasets] = useState<{ id: number; name: string }[]>([]);
   const [selectedDataset, setSelectedDataset] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/datasets.json')
+      .then((res) => res.json())
+      .then((data) => setDatasets(data))
+      .catch(() => setDatasets([]));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,9 +51,9 @@ const Parameters = () => {
               onChange={(e) => setSelectedDataset(e.target.value)}
               required
             >
-              {mockDatasets.map((dataset) => (
-                <MenuItem key={dataset} value={dataset}>
-                  {dataset}
+              {datasets.map((dataset) => (
+                <MenuItem key={dataset.id} value={dataset.name}>
+                  {dataset.name}
                 </MenuItem>
               ))}
             </Select>
