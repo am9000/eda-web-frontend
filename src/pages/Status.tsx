@@ -9,8 +9,6 @@ import {
   TableHead,
   TableRow,
   Chip,
-  Button,
-  Box,
   IconButton,
 } from '@mui/material';
 import { RefreshCw } from 'lucide-react';
@@ -18,7 +16,7 @@ import { RefreshCw } from 'lucide-react';
 const Status = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [selectedTask, setSelectedTask] = useState<number | null>(null);
-  const [logs, setLogs] = useState<string>('');
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [logsLoading, setLogsLoading] = useState(false);
 
@@ -50,9 +48,9 @@ const Status = () => {
     try {
       const res = await fetch(`/api/tasks/${taskId}/logs.json`);
       const data = await res.json();
-      setLogs(Array.isArray(data) ? data.join('\n') : String(data));
+      setLogs(Array.isArray(data) ? data : []);
     } catch (e) {
-      setLogs('Failed to load logs.');
+      setLogs([]);
     } finally {
       setLogsLoading(false);
     }
@@ -64,8 +62,17 @@ const Status = () => {
       COMPLETED: { color: 'success' as const, label: 'Completed' },
       ERROR: { color: 'error' as const, label: 'Error' },
     }[status] || { color: 'default' as const, label: status };
-
     return <Chip {...statusProps} size="small" />;
+  };
+
+  const getLevelChip = (level: string) => {
+    const levelProps = {
+      INFO: { color: 'info' as const, label: 'Info' },
+      WARNING: { color: 'warning' as const, label: 'Warning' },
+      ERROR: { color: 'error' as const, label: 'Error' },
+      DEBUG: { color: 'default' as const, label: 'Debug' },
+    }[level] || { color: 'default' as const, label: level };
+    return <Chip {...levelProps} size="small" />;
   };
 
   return (
@@ -78,10 +85,9 @@ const Status = () => {
           <RefreshCw size={20} />
         </IconButton>
       </div>
-
       <div className="grid gap-6">
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer component={Paper} sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell>Status</TableCell>
@@ -116,7 +122,6 @@ const Status = () => {
             </TableBody>
           </Table>
         </TableContainer>
-
         {selectedTask && (
           <Paper className="p-4">
             <Typography variant="h6" gutterBottom>
@@ -125,9 +130,30 @@ const Status = () => {
             {logsLoading ? (
               <Typography>Loading logs...</Typography>
             ) : (
-              <pre className={"bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap"}>
-                {logs}
-              </pre>
+              <TableContainer sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Timestamp</TableCell>
+                      <TableCell>Level</TableCell>
+                      <TableCell>Message</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {logs.length > 0 ? logs.map((log, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{log.timestamp}</TableCell>
+                        <TableCell>{getLevelChip(log.level)}</TableCell>
+                        <TableCell>{log.message}</TableCell>
+                      </TableRow>
+                    )) : (
+                      <TableRow>
+                        <TableCell colSpan={3}>No logs found.</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             )}
           </Paper>
         )}

@@ -1,6 +1,6 @@
 [
-  "[2024-02-28 10:00:01] Starting data load for Dataset A",
-  "[2024-02-28 10:00:02] Connecting to data source",
-  "[2024-02-28 10:00:03] Loading data for period 2024-01-01 to 2024-01-31",
-  "[2024-02-28 10:00:04] Processing records..."
+  {"timestamp": "2024-02-28 10:00:01", "level": "INFO", "message": "Starting data load for Dataset A"},
+  {"timestamp": "2024-02-28 10:00:02", "level": "INFO", "message": "Connecting to data source"},
+  {"timestamp": "2024-02-28 10:00:03", "level": "INFO", "message": "Loading data for period 2024-01-01 to 2024-01-31"},
+  {"timestamp": "2024-02-28 10:00:04", "level": "INFO", "message": "Processing records..."}
 ]

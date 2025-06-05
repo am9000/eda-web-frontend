@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Drawer,
   List,
   ListItem,
   ListItemButton,
@@ -25,7 +24,7 @@ type SidebarProps = {
   onPageChange: (page: string) => void;
 };
 
-const Sidebar = ({ open, onClose, onPageChange }: SidebarProps) => {
+const Sidebar = ({ onPageChange }: SidebarProps) => {
   const theme = useTheme();
   
   const menuItems = [
@@ -38,18 +37,22 @@ const Sidebar = ({ open, onClose, onPageChange }: SidebarProps) => {
     { text: 'Help', icon: <HelpCircle size={20} />, page: 'help' },
   ];
 
+  // Static sidebar always visible on the left
   return (
-    <Drawer
-      anchor="left"
-      open={open}
-      onClose={onClose}
-      sx={{
-        '& .MuiDrawer-paper': {
-          width: 250,
-          boxSizing: 'border-box',
-          bgcolor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-        },
+    <div
+      style={{
+        width: 250,
+        minHeight: '100vh',
+        background: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+        boxSizing: 'border-box',
+        borderRight: `1px solid ${theme.palette.divider}`,
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        zIndex: 1100,
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <div className="p-4">
@@ -74,7 +77,7 @@ const Sidebar = ({ open, onClose, onPageChange }: SidebarProps) => {
           </ListItem>
         ))}
       </List>
-    </Drawer>
+    </div>
   );
 };
 

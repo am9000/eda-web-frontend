@@ -1,5 +1,5 @@
 [
-  "[2024-02-26 08:00:01] Starting data load for Dataset C",
-  "[2024-02-26 08:00:02] Error: Connection failed",
-  "[2024-02-26 08:00:03] Aborting load."
+  {"timestamp": "2024-02-26 08:00:01", "level": "INFO", "message": "Starting data load for Dataset C"},
+  {"timestamp": "2024-02-26 08:00:02", "level": "ERROR", "message": "Error: Connection failed"},
+  {"timestamp": "2024-02-26 08:00:03", "level": "INFO", "message": "Aborting load."}
 ]

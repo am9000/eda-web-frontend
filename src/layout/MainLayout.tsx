@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Toolbar, useTheme } from '@mui/material';
-import Navbar from '../components/Navbar';
+import React from 'react';
+import { Box, useTheme } from '@mui/material';
 import Sidebar from '../components/Sidebar';
 
 type MainLayoutProps = {
@@ -9,12 +8,7 @@ type MainLayoutProps = {
 };
 
 const MainLayout = ({ children, onPageChange }: MainLayoutProps) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
-
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   return (
     <Box 
@@ -26,24 +20,19 @@ const MainLayout = ({ children, onPageChange }: MainLayoutProps) => {
       }}
       className="transition-colors duration-300"
     >
-      <Navbar toggleDrawer={toggleDrawer} />
       <Sidebar 
-        open={drawerOpen} 
-        onClose={() => setDrawerOpen(false)} 
-        onPageChange={(page) => {
-          onPageChange(page);
-          setDrawerOpen(false);
-        }}
+        open={true} 
+        onClose={() => {}} 
+        onPageChange={onPageChange}
       />
-      
       <Box 
         component="main" 
         sx={{ 
           flexGrow: 1,
           width: '100%',
+          marginLeft: '250px', // Sidebar width
         }}
       >
-        <Toolbar /> {/* Spacer for fixed app bar */}
         {children}
       </Box>
     </Box>
